@@ -4,16 +4,13 @@ Created on Fri May 27 20:01:07 2016
 
 @author: Jinhao
 """
-import datetime
+
 import pandas as pd
 import numpy as np
-from sklearn.cross_validation import train_test_split
-import xgboost as xgb
 import random
-from operator import itemgetter
-import zipfile
-from sklearn.metrics import roc_auc_score
-import time
+import distance
+from stop_words import get_stop_words
+
 random.seed(2016)
 
 ######################
@@ -23,6 +20,9 @@ path = "../input/"
 #!!! NEED TO EXPAND ON THESE LIST OF FEATURES (Augmenting image data?) !!!!!!#
 listOfFeatures = ['itemID', 'categoryID', 'price', 'locationID', \
                     'metroID', 'lat', 'lon']
+                    
+stop_words = get_stop_words('russian')
+
 
 ###############################
 ## reading in training files ##
@@ -76,6 +76,12 @@ def input_training():
                         on='categoryID', left_index=True)
     itemInfo = pd.merge(itemInfo, location, how='left',  \
                         on='locationID', left_index=True)
+
+    # adding text features by removing stop words                        
+    print('Add text features')
+    itemInfo['title_corpus'] = [word for word in itemInfo['title'].str.lower().split() if word not in stop_words]
+    itemInfo['description_corpus'] = [word for word in itemInfo['description'].str.lower().split() if word not in stop_words]
+    itemInfo['attrsJSON_corpus'] = [word for word in itemInfo['attrsJSON'].str.lower().split() if word not in stop_words]
         
     # creation of info for item 1 (to match with itemID_1 in the training set)
     item1 = itemInfo[listOfFeatures] # See global variables for this definition
@@ -92,7 +98,10 @@ def input_training():
             'regionID': 'regionID_1',
             'metroID': 'metroID_1',
             'lat': 'lat_1',
-            'lon': 'lon_1'
+            'lon': 'lon_1',
+            'title_corpus' : 'title_corpus_1',
+            'description_corpus': 'description_corpus_1',
+            'attrsJSON_corpus': 'attrsJSON_corpus_1'            
         }
     )
         
@@ -111,6 +120,9 @@ def input_training():
             'metroID': 'metroID_2',
             'lat': 'lat_2',
             'lon': 'lon_2',
+            'title_corpus' : 'title_corpus_2',
+            'description_corpus': 'description_corpus_2',
+            'attrsJSON_corpus': 'attrsJSON_corpus_2'
         }
     )
         
@@ -136,6 +148,15 @@ def input_training():
     train['metroID_same'] = np.equal(train['metroID_1'], train['metroID_2']).astype(np.int32)
     train['lat_same'] = np.equal(train['lat_1'], train['lat_2']).astype(np.int32)
     train['lon_same'] = np.equal(train['lon_1'], train['lon_2']).astype(np.int32)
+    
+    # comparing string via normalized levenshtein distance
+    # threhold for 1 is set at distance 0.8
+    train['title_distance'] = 1 if distance.nlevenshtein(train['title_corpus_1'],train['title_corpus_2']) \
+                                > 0.8 else 0
+    train['description_distance'] = 1 if distance.nlevenshtein(train['description_corpus_1'],train['description_corpus_2']) \
+                                > 0.8 else 0
+    train['attrsJSON_distance'] = 1 if distance.nlevenshtein(train['attrsJSON_corpus_1'],train['attrsJSON_corpus_2']) \
+                                > 0.8 else 0
     
     # returning the training data
     return train
