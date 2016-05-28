@@ -152,11 +152,11 @@ def input_training():
     # comparing string via normalized levenshtein distance
     # threhold for 1 is set at distance 0.8
     train['title_distance'] = 1 if distance.nlevenshtein(train['title_corpus_1'],train['title_corpus_2']) \
-                                > 0.8 else 0
+                                < 0.8 else 0
     train['description_distance'] = 1 if distance.nlevenshtein(train['description_corpus_1'],train['description_corpus_2']) \
-                                > 0.8 else 0
+                                < 0.8 else 0
     train['attrsJSON_distance'] = 1 if distance.nlevenshtein(train['attrsJSON_corpus_1'],train['attrsJSON_corpus_2']) \
-                                > 0.8 else 0
+                                < 0.8 else 0
     
     # returning the training data
     return train
