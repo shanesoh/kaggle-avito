@@ -56,11 +56,9 @@ def _add_pairs_features(pairs):
         pairs['lon_2']).astype(
         np.int32)
 
+    print pairs[['title_1', 'title_2']].dtypes
     # Normalized edit distance of texts
     print("Adding edit distance")
-    pairs['title_ratio'] = pairs[['title_1', 'title_2']].astype(str).apply(
-        lambda x: fuzz.ratio(x[0], x[1]),
-        axis=1)
     pairs['description_ratio'] = pairs[
         ['description_1', 'description_2']].astype(str).apply(
         lambda x: fuzz.ratio(x[0], x[1]), axis=1)

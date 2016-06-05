@@ -116,8 +116,8 @@ if __name__ == '__main__':
     '''
     Load Data
     '''
-    train, test, features = load_data(train_rows=100000, test_rows=5000)
-    #print train.head(10)
+    train, test, features = load_data(train_rows=5000, test_rows=5000)
+    print train.head(10)
     '''
     Imputation - i.e Fill in missing entries
     '''
