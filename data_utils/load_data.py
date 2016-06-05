@@ -53,15 +53,19 @@ def _add_pairs_features(pairs):
         pairs['lon_2']).astype(
         np.int32)
 
+    print pairs[['title_1', 'title_2']].dtypes
     # Normalized edit distance of texts
     pairs['title_dist'] = pairs[['title_1', 'title_2']].apply(
-        lambda x: edit_distance(x[0], x[1]) / float(len(x[0]) + len(x[1])),
+        lambda x: edit_distance(str(x[0]), str(x[1])) / float(len(str(x[0])) + len(str(x[1]))),
         axis=1)
+        
+    print pairs['title_dist'] 
+    
     pairs['description_dist'] = pairs[['description_1', 'description_2']].apply(
-        lambda x: edit_distance(x[0], x[1]) / float(len(x[0]) + len(x[1])),
+        lambda x: edit_distance(str(x[0]), str(x[1])) / float(len(str(x[0])) + len(str(x[1]))),
         axis=1)
     pairs['attrsJSON_dist'] = pairs[['attrsJSON_1', 'attrsJSON_2']].apply(
-        lambda x: edit_distance(x[0], x[1]) / float(len(x[0]) + len(x[1])),
+        lambda x: edit_distance(str(x[0]), str(x[0])) / float(len(str(x[0])) + len(str(x[0]))),
         axis=1)
     pairs.drop(['title_1', 'title_2', 'description_1', 'description_2',
                 'attrsJSON_1', 'attrsJSON_2'], axis=1, inplace=True)
@@ -69,11 +73,15 @@ def _add_pairs_features(pairs):
     return pairs
 
 
-def load_data():
+def load_data(train_rows=100000, test_rows=None):
     """
     Load ItemInfo, do feature engineering on ItemInfo, then merge into ItemPairs,
     do feature engineering on ItemPairs, then return train/test examples and
     features used
+    
+    train_rows: Number of rows to load from ItemInfo_train.csv
+    test_rows: Number of rows to load from ItemInfo_test.csv    
+    
     :return: train df, test df and list of features
     """
     types = {
@@ -90,11 +98,11 @@ def load_data():
         'lon': np.dtype(float),
     }
     print("Load ItemInfo_train.csv")
-    iteminfo_train = pd.read_csv("./data/ItemInfo_train.csv", dtype=types)
+    iteminfo_train = pd.read_csv("./data/ItemInfo_train.csv", dtype=types, nrows=train_rows)
     iteminfo_train.fillna(-1, inplace=True)
 
     print("Load ItemInfo_test.csv")
-    iteminfo_test = pd.read_csv("./data/ItemInfo_test.csv", dtype=types)
+    iteminfo_test = pd.read_csv("./data/ItemInfo_test.csv", dtype=types, nrows=test_rows)
     iteminfo_test.fillna(-1, inplace=True)
 
     # Add in location and category data
@@ -151,21 +159,24 @@ def _merge_itempairs(iteminfo_train, iteminfo_test):
     }
     print("Load ItemPairs_train.csv")
     itempairs_train = pd.read_csv("./data/ItemPairs_train.csv", dtype=types)
+    
     print("Load ItemPairs_test.csv")
     itempairs_test = pd.read_csv("./data/ItemPairs_test.csv", dtype=types)
 
     # Merge itempairs for train set
     iteminfo_train_1 = iteminfo_train.copy(deep=True)
     iteminfo_train_1.rename(columns=lambda x: x+'_1', inplace=True)
-    itempairs_train = pd.merge(itempairs_train, iteminfo_train_1, how='left',
-                               on='itemID_1', left_index=True)
+    itempairs_train = pd.merge(itempairs_train, iteminfo_train_1, how='inner',
+                               on='itemID_1')
+    
     iteminfo_train_2 = iteminfo_train.copy(deep=True)
     iteminfo_train_2.rename(columns=lambda x: x+'_2', inplace=True)
-    itempairs_train = pd.merge(itempairs_train, iteminfo_train_2, how='left',
-                               on='itemID_2', left_index=True)
+    itempairs_train = pd.merge(itempairs_train, iteminfo_train_2, how='inner',
+                               on='itemID_2')
+                               
     # 'generationMethod' exists only in train, so drop
     itempairs_train.drop('generationMethod', axis=1, inplace=True)
-
+    
     # Merge itempairs for test set
     iteminfo_test_1 = iteminfo_test.copy(deep=True)
     iteminfo_test_1.rename(columns=lambda x: x+'_1', inplace=True)
