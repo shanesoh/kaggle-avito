@@ -2,6 +2,7 @@ import pandas as pd
 import numpy as np
 from fuzzywuzzy import fuzz
 
+
 def _add_item_features(items):
     """
     Do feature engineering here by adding features to each individual item, i.e.
@@ -60,41 +61,45 @@ def _add_pairs_features(pairs):
     pairs['title_ratio'] = pairs[['title_1', 'title_2']].astype(str).apply(
         lambda x: fuzz.ratio(x[0], x[1]),
         axis=1)
-    pairs['description_ratio'] = pairs[['description_1', 'description_2']].astype(str).apply(
-        lambda x: fuzz.ratio(x[0], x[1]),
-        axis=1)
-    pairs['attrsJSON_ratio'] = pairs[['attrsJSON_1', 'attrsJSON_2']].astype(str).apply(
-        lambda x: fuzz.ratio(x[0], x[1]),
-        axis=1)
-    pairs['title_token_sort_ratio'] = pairs[['title_1', 'title_2']].astype(str).apply(
-        lambda x: fuzz.token_sort_ratio(x[0], x[1]),
-        axis=1)
-    pairs['description_token_sort_ratio'] = pairs[['description_1', 'description_2']].astype(str).apply(
-        lambda x: fuzz.token_sort_ratio(x[0], x[1]),
-        axis=1)
-    pairs['attrsJSON_token_sort_ratio'] = pairs[['attrsJSON_1', 'attrsJSON_2']].astype(str).apply(
-        lambda x: fuzz.token_sort_ratio(x[0], x[1]),
-        axis=1)
-    pairs['title_partial_ratio'] = pairs[['title_1', 'title_2']].astype(str).apply(
-        lambda x: fuzz.partial_ratio(x[0], x[1]),
-        axis=1)
-    pairs['description_partial_ratio'] = pairs[['description_1', 'description_2']].astype(str).apply(
-        lambda x: fuzz.partial_ratio(x[0], x[1]),
-        axis=1)
-    pairs['attrsJSON_partial_ratio'] = pairs[['attrsJSON_1', 'attrsJSON_2']].astype(str).apply(
-        lambda x: fuzz.partial_ratio(x[0], x[1]),
-        axis=1)
+    pairs['description_ratio'] = pairs[
+        ['description_1', 'description_2']].astype(str).apply(
+        lambda x: fuzz.ratio(x[0], x[1]), axis=1)
+    pairs['attrsJSON_ratio'] = pairs[
+        ['attrsJSON_1', 'attrsJSON_2']].astype(str).apply(
+        lambda x: fuzz.ratio(x[0], x[1]), axis=1)
+    pairs['title_token_sort_ratio'] = pairs[
+        ['title_1', 'title_2']].astype(str).apply(
+        lambda x: fuzz.token_sort_ratio(x[0], x[1]), axis=1)
+    pairs['description_token_sort_ratio'] = pairs[
+        ['description_1', 'description_2']].astype(str).apply(
+        lambda x: fuzz.token_sort_ratio(x[0], x[1]), axis=1)
+    pairs['attrsJSON_token_sort_ratio'] = pairs[
+        ['attrsJSON_1', 'attrsJSON_2']].astype(str).apply(
+        lambda x: fuzz.token_sort_ratio(x[0], x[1]), axis=1)
+    pairs['title_partial_ratio'] = pairs[
+        ['title_1', 'title_2']].astype(str).apply(
+        lambda x: fuzz.partial_ratio(x[0], x[1]), axis=1)
+    pairs['description_partial_ratio'] = pairs[
+        ['description_1', 'description_2']].astype(str).apply(
+        lambda x: fuzz.partial_ratio(x[0], x[1]), axis=1)
+    pairs['attrsJSON_partial_ratio'] = pairs[
+        ['attrsJSON_1', 'attrsJSON_2']].astype(str).apply(
+        lambda x: fuzz.partial_ratio(x[0], x[1]), axis=1)
     pairs.drop(['title_1', 'title_2', 'description_1', 'description_2',
                 'attrsJSON_1', 'attrsJSON_2'], axis=1, inplace=True)
 
     return pairs
 
 
-def load_data():
+def load_data(train_rows=100000, test_rows=None):
     """
     Load ItemInfo, do feature engineering on ItemInfo, then merge into ItemPairs,
     do feature engineering on ItemPairs, then return train/test examples and
     features used
+
+    train_rows: Number of rows to load from ItemInfo_train.csv
+    test_rows: Number of rows to load from ItemInfo_test.csv
+
     :return: train df, test df and list of features
     """
     types = {
@@ -111,11 +116,17 @@ def load_data():
         'lon': np.dtype(float),
     }
     print("Load ItemInfo_train.csv")
-    iteminfo_train = pd.read_csv("./data/ItemInfo_train.csv", dtype=types)
+    iteminfo_train = pd.read_csv(
+        "./data/ItemInfo_train.csv",
+        dtype=types,
+        nrows=train_rows)
     iteminfo_train.fillna(-1, inplace=True)
 
     print("Load ItemInfo_test.csv")
-    iteminfo_test = pd.read_csv("./data/ItemInfo_test.csv", dtype=types)
+    iteminfo_test = pd.read_csv(
+        "./data/ItemInfo_test.csv",
+        dtype=types,
+        nrows=test_rows)
     iteminfo_test.fillna(-1, inplace=True)
 
     # Add in location and category data
@@ -172,18 +183,21 @@ def _merge_itempairs(iteminfo_train, iteminfo_test):
     }
     print("Load ItemPairs_train.csv")
     itempairs_train = pd.read_csv("./data/ItemPairs_train.csv", dtype=types)
+
     print("Load ItemPairs_test.csv")
     itempairs_test = pd.read_csv("./data/ItemPairs_test.csv", dtype=types)
 
     # Merge itempairs for train set
     iteminfo_train_1 = iteminfo_train.copy(deep=True)
     iteminfo_train_1.rename(columns=lambda x: x+'_1', inplace=True)
-    itempairs_train = pd.merge(itempairs_train, iteminfo_train_1, how='left',
-                               on='itemID_1', left_index=True)
+    itempairs_train = pd.merge(itempairs_train, iteminfo_train_1, how='inner',
+                               on='itemID_1')
+
     iteminfo_train_2 = iteminfo_train.copy(deep=True)
     iteminfo_train_2.rename(columns=lambda x: x+'_2', inplace=True)
-    itempairs_train = pd.merge(itempairs_train, iteminfo_train_2, how='left',
-                               on='itemID_2', left_index=True)
+    itempairs_train = pd.merge(itempairs_train, iteminfo_train_2, how='inner',
+                               on='itemID_2')
+
     # 'generationMethod' exists only in train, so drop
     itempairs_train.drop('generationMethod', axis=1, inplace=True)
 
