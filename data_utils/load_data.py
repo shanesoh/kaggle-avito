@@ -53,17 +53,15 @@ def _add_pairs_features(pairs):
         pairs['lon_2']).astype(
         np.int32)
 
-    print pairs[['title_1', 'title_2']].dtypes
     # Normalized edit distance of texts
     pairs['title_dist'] = pairs[['title_1', 'title_2']].apply(
         lambda x: edit_distance(str(x[0]), str(x[1])) / float(len(str(x[0])) + len(str(x[1]))),
         axis=1)
-        
-    print pairs['title_dist'] 
     
     pairs['description_dist'] = pairs[['description_1', 'description_2']].apply(
         lambda x: edit_distance(str(x[0]), str(x[1])) / float(len(str(x[0])) + len(str(x[1]))),
         axis=1)
+        
     pairs['attrsJSON_dist'] = pairs[['attrsJSON_1', 'attrsJSON_2']].apply(
         lambda x: edit_distance(str(x[0]), str(x[0])) / float(len(str(x[0])) + len(str(x[0]))),
         axis=1)
