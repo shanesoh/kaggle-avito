@@ -120,7 +120,7 @@ if __name__ == '__main__':
     print('Length of test: ', len(test))
     print('Features [{}]: {}'.format(len(features), sorted(features)))
     # Get only subset of data
-    if 1:
+    if 0:
         len_old = len(train.index)
         train = train.sample(frac=0.5)
         len_new = len(train.index)

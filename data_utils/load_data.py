@@ -1,7 +1,6 @@
 import pandas as pd
 import numpy as np
-from nltk.metrics.distance import edit_distance
-
+from Levenshtein import distance
 
 def _add_item_features(items):
     """
@@ -10,10 +9,12 @@ def _add_item_features(items):
     :param items: iteminfo df
     """
     # Add lens of texts
+    print("Adding lens of text")
     items['len_title'] = items['title'].str.len()
     items['len_description'] = items['description'].str.len()
     items['len_attrsJSON'] = items['attrsJSON'].str.len()
 
+    items.drop(['images_array'], axis=1, inplace=True)
     return items
 
 
@@ -24,6 +25,7 @@ def _add_pairs_features(pairs):
     :param pairs: itempairs df
     """
     # Add binary features indicating if attributes are equal
+    print("Adding binary features")
     pairs['price_same'] = np.equal(
         pairs['price_1'],
         pairs['price_2']).astype(
@@ -54,14 +56,15 @@ def _add_pairs_features(pairs):
         np.int32)
 
     # Normalized edit distance of texts
-    pairs['title_dist'] = pairs[['title_1', 'title_2']].apply(
-        lambda x: edit_distance(x[0], x[1]) / float(len(x[0]) + len(x[1])),
+    print("Adding edit distance")
+    pairs['title_dist'] = pairs[['title_1', 'title_2']].astype(str).apply(
+        lambda x: distance(x[0], x[1]) / float(len(x[0]) + len(x[1])),
         axis=1)
-    pairs['description_dist'] = pairs[['description_1', 'description_2']].apply(
-        lambda x: edit_distance(x[0], x[1]) / float(len(x[0]) + len(x[1])),
+    pairs['description_dist'] = pairs[['description_1', 'description_2']].astype(str).apply(
+        lambda x: distance(x[0], x[1]) / float(len(x[0]) + len(x[1])),
         axis=1)
-    pairs['attrsJSON_dist'] = pairs[['attrsJSON_1', 'attrsJSON_2']].apply(
-        lambda x: edit_distance(x[0], x[1]) / float(len(x[0]) + len(x[1])),
+    pairs['attrsJSON_dist'] = pairs[['attrsJSON_1', 'attrsJSON_2']].astype(str).apply(
+        lambda x: distance(x[0], x[1]) / float(len(x[0]) + len(x[1])),
         axis=1)
     pairs.drop(['title_1', 'title_2', 'description_1', 'description_2',
                 'attrsJSON_1', 'attrsJSON_2'], axis=1, inplace=True)

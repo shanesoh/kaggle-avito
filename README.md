@@ -2,4 +2,4 @@
 DA takes on the Kaggle Avito challenge :D
 
 Package dependencies:
-nltk
+python-Levenshtein
