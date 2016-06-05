@@ -113,18 +113,9 @@ def create_submission(score, test, prediction):
     f.close()
 
 if __name__ == '__main__':
-    '''
-    Load Data
-    '''
-    train, test, features = load_data(train_rows=5000, test_rows=5000)
-    print train.head(10)
-    '''
-    Imputation - i.e Fill in missing entries
-    '''
-
+    train, test, features = load_data()
     train.fillna(-1, inplace=True)
     test.fillna(-1, inplace=True)
-
     print('Length of train: ', len(train))
     print('Length of test: ', len(test))
     print('Features [{}]: {}'.format(len(features), sorted(features)))
