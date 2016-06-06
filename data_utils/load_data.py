@@ -92,11 +92,13 @@ def _add_pairs_features(pairs):
     return pairs
 
 
-def load_data():
+def load_data(train_egs=None, test_egs=None):
     """
     Load ItemInfo, do feature engineering on ItemInfo, then merge into ItemPairs,
     do feature engineering on ItemPairs, then return train/test examples and
     features used
+    :param train_egs: Randomly sample train_egs examples for training
+    :param test_egs: Randomly sample test_egs examples for testing
     :return: train df, test df and list of features
     """
     types = {
@@ -115,10 +117,14 @@ def load_data():
     print("Load ItemInfo_train.csv")
     iteminfo_train = pd.read_csv("./data/ItemInfo_train.csv", dtype=types)
     iteminfo_train.fillna(-1, inplace=True)
+    if train_egs:
+        iteminfo_train = iteminfo_train.sample(n=train_egs)
 
     print("Load ItemInfo_test.csv")
     iteminfo_test = pd.read_csv("./data/ItemInfo_test.csv", dtype=types)
     iteminfo_test.fillna(-1, inplace=True)
+    if test_egs:
+        iteminfo_test = iteminfo_test.sample(n=test_egs)
 
     # Add in location and category data
     location = pd.read_csv("./data/Location.csv")

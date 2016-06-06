@@ -113,7 +113,7 @@ def create_submission(score, test, prediction):
     f.close()
 
 if __name__ == '__main__':
-    train, test, features = load_data()
+    train, test, features = load_data(train_egs=100000, test_egs=10000)
     train.fillna(-1, inplace=True)
     test.fillna(-1, inplace=True)
     print('Length of train: ', len(train))
