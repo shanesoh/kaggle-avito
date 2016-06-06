@@ -1,6 +1,7 @@
 import pandas as pd
 import numpy as np
 from fuzzywuzzy import fuzz
+import time
 
 
 def _add_item_features(items):
@@ -58,12 +59,15 @@ def _add_pairs_features(pairs):
 
     # Normalized edit distance of texts
     print("Adding edit distance")
-    pairs['description_ratio'] = pairs[
-        ['description_1', 'description_2']].astype(str).apply(
-        lambda x: fuzz.ratio(x[0], x[1]), axis=1)
-    pairs['attrsJSON_ratio'] = pairs[
-        ['attrsJSON_1', 'attrsJSON_2']].astype(str).apply(
-        lambda x: fuzz.ratio(x[0], x[1]), axis=1)
+    # pairs['title_ratio'] = pairs[
+    #    ['title_1', 'title_2']].astype(str).apply(
+    #    lambda x: fuzz.ratio(x[0], x[1]), axis=1)
+    # pairs['description_ratio'] = pairs[
+    #    ['description_1', 'description_2']].astype(str).apply(
+    #    lambda x: fuzz.ratio(x[0], x[1]), axis=1)
+    # pairs['attrsJSON_ratio'] = pairs[
+    #    ['attrsJSON_1', 'attrsJSON_2']].astype(str).apply(
+    #    lambda x: fuzz.ratio(x[0], x[1]), axis=1)
     pairs['title_token_sort_ratio'] = pairs[
         ['title_1', 'title_2']].astype(str).apply(
         lambda x: fuzz.token_sort_ratio(x[0], x[1]), axis=1)
@@ -74,14 +78,14 @@ def _add_pairs_features(pairs):
         ['attrsJSON_1', 'attrsJSON_2']].astype(str).apply(
         lambda x: fuzz.token_sort_ratio(x[0], x[1]), axis=1)
     pairs['title_partial_ratio'] = pairs[
-        ['title_1', 'title_2']].astype(str).apply(
-        lambda x: fuzz.partial_ratio(x[0], x[1]), axis=1)
+       ['title_1', 'title_2']].astype(str).apply(
+       lambda x: fuzz.partial_ratio(x[0], x[1]), axis=1)
     pairs['description_partial_ratio'] = pairs[
-        ['description_1', 'description_2']].astype(str).apply(
-        lambda x: fuzz.partial_ratio(x[0], x[1]), axis=1)
+       ['description_1', 'description_2']].astype(str).apply(
+       lambda x: fuzz.partial_ratio(x[0], x[1]), axis=1)
     pairs['attrsJSON_partial_ratio'] = pairs[
-        ['attrsJSON_1', 'attrsJSON_2']].astype(str).apply(
-        lambda x: fuzz.partial_ratio(x[0], x[1]), axis=1)
+       ['attrsJSON_1', 'attrsJSON_2']].astype(str).apply(
+       lambda x: fuzz.partial_ratio(x[0], x[1]), axis=1)
     pairs.drop(['title_1', 'title_2', 'description_1', 'description_2',
                 'attrsJSON_1', 'attrsJSON_2'], axis=1, inplace=True)
 
@@ -145,16 +149,28 @@ def load_data():
         left_index=True)
 
     # Feature engineering on ItemInfo, i.e. individual items
+    start_time = time.time()
     iteminfo_train = _add_item_features(iteminfo_train)
     iteminfo_test = _add_item_features(iteminfo_test)
+    print(
+        'Feature eng ItemInfo time: {} minutes'.format(
+            round(
+                (time.time() - start_time)/60,
+                2)))
 
     # Merge iteminfo onto itempairs
     itempairs_train, itempairs_test = _merge_itempairs(
         iteminfo_train, iteminfo_test)
 
     # Feature engineering on ItemPairs, i.e. pair of items
+    start_time = time.time()
     itempairs_train = _add_pairs_features(itempairs_train)
     itempairs_test = _add_pairs_features(itempairs_test)
+    print(
+        'Feature eng ItemPairs time: {} minutes'.format(
+            round(
+                (time.time() - start_time)/60,
+                2)))
 
     # Extract features
     features = _get_features(itempairs_train, itempairs_test)

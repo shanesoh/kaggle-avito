@@ -29,7 +29,7 @@ def get_importance(gbm, features):
 
 def run_default_test(train, test, features, target, random_state=0):
     eta = 0.1
-    max_depth = 5
+    max_depth = 8
     subsample = 0.8
     colsample_bytree = 0.8
     start_time = time.time()
