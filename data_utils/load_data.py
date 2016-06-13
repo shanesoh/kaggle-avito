@@ -2,6 +2,7 @@ import pandas as pd
 import numpy as np
 from gensim.models import Doc2Vec
 import time
+from Levenshtein import distance
 
 
 class Featurizer():
@@ -74,6 +75,13 @@ class Featurizer():
             ['itemID_1', 'itemID_2']].apply(
             lambda x, self=self: self._desc_d2v.docvecs.similarity(x[0], x
                                                                    [1]), axis=1)
+
+        # Compute JSON edit distances
+        # TODO: maybe count individual value edit distances, count number of
+        # different keys
+        print("Adding json edit distance")
+        pairs['json_edit'] = pairs[['attrsJSON_1', 'attrsJSON_2']].apply(
+            lambda x: distance(str(x[0]), str(x[1])), axis=1)
 
         pairs.drop(['title_1', 'title_2', 'description_1', 'description_2',
                     'attrsJSON_1', 'attrsJSON_2'], axis=1, inplace=True)
