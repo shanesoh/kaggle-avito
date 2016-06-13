@@ -29,7 +29,7 @@ def get_importance(gbm, features):
 
 def run_default_test(train, test, features, target, random_state=0):
     eta = 0.1
-    max_depth = 8
+    max_depth = 5
     subsample = 0.8
     colsample_bytree = 0.8
     start_time = time.time()
@@ -113,18 +113,12 @@ def create_submission(score, test, prediction):
     f.close()
 
 if __name__ == '__main__':
-    train, test, features = load_data(train_egs=100000, test_egs=10000)
+    train, test, features = load_data()
     train.fillna(-1, inplace=True)
     test.fillna(-1, inplace=True)
     print('Length of train: ', len(train))
     print('Length of test: ', len(test))
     print('Features [{}]: {}'.format(len(features), sorted(features)))
-    # Get only subset of data
-    if 0:
-        len_old = len(train.index)
-        train = train.sample(frac=0.5)
-        len_new = len(train.index)
-        print('Reduce train from {} to {}'.format(len_old, len_new))
     test_prediction, score = run_default_test(
         train, test, features, 'isDuplicate')
     print('Real score = {}'.format(score))
