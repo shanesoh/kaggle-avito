@@ -55,7 +55,6 @@ class Featurizer():
             pairs['metroID_1'],
             pairs['metroID_2']).astype(
             np.int32)
-        import pdb; pdb.set_trace()  # XXX BREAKPOINT
         pairs['lat_same'] = np.equal(
             pairs['lat_1'],
             pairs['lat_2']).astype(
@@ -64,6 +63,11 @@ class Featurizer():
             pairs['lon_1'],
             pairs['lon_2']).astype(
             np.int32)
+
+        # Add l2 distance of lon/lat
+        print("Adding l2 distances")
+        pairs['geo_l2'] = pairs.apply(lambda x: np.linalg.norm(
+            [x.lon_1-x.lon_2, x.lat_1-x.lat_2]), axis=1)
 
         # Add precomputed edit distances (using fuzzywuzzy)
         print("Adding precomputed edit distances")
