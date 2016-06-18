@@ -39,6 +39,10 @@ class Featurizer():
             pairs['locationID_1'],
             pairs['locationID_2']).astype(
             np.int32)
+        pairs['parentCategoryID_same'] = np.equal(
+            pairs['parentCategoryID_1'],
+            pairs['parentCategoryID_2']).astype(
+            np.int32)
         pairs['categoryID_same'] = np.equal(
             pairs['categoryID_1'],
             pairs['categoryID_2']).astype(
@@ -51,6 +55,7 @@ class Featurizer():
             pairs['metroID_1'],
             pairs['metroID_2']).astype(
             np.int32)
+        import pdb; pdb.set_trace()  # XXX BREAKPOINT
         pairs['lat_same'] = np.equal(
             pairs['lat_1'],
             pairs['lat_2']).astype(
