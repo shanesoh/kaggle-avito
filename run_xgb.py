@@ -14,11 +14,16 @@ from models.classifiers import XGBClassifier
 
 
 def run_test():
-    clf = XGBClassifier()
+    clf = XGBClassifier(
+        eta = .1,
+        max_depth = 8,
+        subsample = .8,
+        colsample_bytree = .8,
+        min_child_weight = 1,
+        num_rounds = 100000,
+        early_stopping_rounds = 20)
 
     train, test, features = load_data(train_egs=1000, test_egs=100)
-    train.fillna(-1, inplace=True)
-    test.fillna(-1, inplace=True)
     print('Length of train: ', len(train))
     print('Length of test: ', len(test))
     print('Features [{}]: {}'.format(len(features), sorted(features)))
@@ -54,8 +59,6 @@ def run_test():
 
 def run_cv():
     train, test, features = load_data(train_egs=1000, test_egs=100)
-    train.fillna(-1, inplace=True)
-    test.fillna(-1, inplace=True)
     print('Length of train: ', len(train))
     print('Length of test: ', len(test))
     print('Features [{}]: {}'.format(len(features), sorted(features)))

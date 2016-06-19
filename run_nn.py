@@ -9,7 +9,7 @@ import datetime
 def run_test():
     clf = NNClassifier(
         batch_norm=True,
-        hidden_units=512,
+        hidden_units=1024,
         hidden_layers=5,
         dropout=0.5,
         prelu=True,
@@ -22,11 +22,9 @@ def run_test():
         decay=None,
         rho=0.9,
         epsilon=1e-08,
-        patience=10)
+        patience=4)
 
-    train, test, features = load_data()
-    train.fillna(-1, inplace=True)
-    test.fillna(-1, inplace=True)
+    train, test, features = load_data(train_egs=1000, test_egs=100)
     print('Length of train: ', len(train))
     print('Length of test: ', len(test))
     print('Features [{}]: {}'.format(len(features), sorted(features)))

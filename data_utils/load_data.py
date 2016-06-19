@@ -248,4 +248,6 @@ def load_data(train_egs=None, test_egs=None):
 
     # Extract features
     features = featurizer._get_features(itempairs_train, itempairs_test)
+    itempairs_train.fillna(-1, inplace=True)
+    itempairs_test.fillna(-1, inplace=True)
     return itempairs_train, itempairs_test, features
