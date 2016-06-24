@@ -19,6 +19,12 @@ class Featurizer():
         items['len_description'] = items['description'].str.len()
         items['len_attrsJSON'] = items['attrsJSON'].str.len()
 
+        # Add precomputed phashes
+        print("Adding number of images")
+        items['num_images'] = items['images_array'].apply(
+            lambda x: len([
+                idx for idx in str(x).split(',') if idx != '-1']))
+
         items.drop(['images_array'], axis=1, inplace=True)
         return items
 
@@ -74,6 +80,15 @@ class Featurizer():
         try:
             edit = pd.read_csv('itempairs_%s_edit_distances.csv' % split)
             pairs = pd.merge(pairs, edit, how='left',
+                             on=['itemID_1', 'itemID_2'])
+        except:
+            raise Exception("Invalid split specified or file does not exist")
+
+        # Add precomputed phash distances
+        print("Adding precomputed phash distances")
+        try:
+            phash = pd.read_csv('itempairs_%s_phash_distances.csv' % split)
+            pairs = pd.merge(pairs, phash, how='left',
                              on=['itemID_1', 'itemID_2'])
         except:
             raise Exception("Invalid split specified or file does not exist")

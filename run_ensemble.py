@@ -7,6 +7,7 @@ from sklearn.cross_validation import train_test_split
 import numpy as np
 import datetime
 
+
 def stack_nn(train, test, y):
     clf1 = NNClassifier(
         batch_norm=True,
@@ -57,7 +58,7 @@ def stack_trees(train, test, y):
         subsample=.8,
         colsample_bytree=.8,
         min_child_weight=1,
-        num_rounds=500,
+        num_rounds=5000,
         early_stopping_rounds=20)
 
     clf2 = XGBClassifier(
@@ -66,7 +67,7 @@ def stack_trees(train, test, y):
         subsample=.8,
         colsample_bytree=.8,
         min_child_weight=1,
-        num_rounds=500,
+        num_rounds=5000,
         early_stopping_rounds=20)
 
     clfs = [clf1, clf2]
@@ -78,7 +79,7 @@ def stack_trees(train, test, y):
 
 
 def run_test():
-    train, test, features = load_data(train_egs=100000)
+    train, test, features = load_data()
     print('Length of train: ', len(train))
     print('Length of test: ', len(test))
     print('Features [{}]: {}'.format(len(features), sorted(features)))
@@ -89,19 +90,22 @@ def run_test():
     y_valid = X_valid['isDuplicate'].values
 
     # Stack first level models and get meta features
-    print('Stacking models')
+    print('Stacking train nn')
     meta_nn_train, meta_nn_test = stack_nn(
         X_train[features],
         test[features],
         y_train)
+    print('Stacking train trees')
     meta_trees_train, meta_trees_test = stack_trees(
         X_train[features],
         test[features],
         y_train)
+    print('Stacking valid nn')
     meta_nn_train, meta_nn_valid = stack_nn(
         X_train[features],
         X_valid[features],
         y_train)
+    print('Stacking valid trees')
     meta_trees_train, meta_trees_valid = stack_trees(
         X_train[features],
         X_valid[features],
