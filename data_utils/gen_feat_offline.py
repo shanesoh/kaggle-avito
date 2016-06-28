@@ -11,6 +11,8 @@ from Levenshtein import distance
 from sklearn.metrics.pairwise import pairwise_distances
 from sklearn.metrics.pairwise import cosine_similarity
 from sklearn.metrics import hamming_loss
+import warnings
+warnings.filterwarnings('ignore')
 
 
 class OfflineFeaturizer(Featurizer):
@@ -25,6 +27,16 @@ class OfflineFeaturizer(Featurizer):
                   'data/images/image_ae_7.csv',
                   'data/images/image_ae_8.csv',
                   'data/images/image_ae_9.csv']
+
+        # Load all ae vectors into memory
+        imgidx2ae = {}
+        for ae_file in ae_dir:
+            print("Loading %s" % ae_file)
+            with open(ae_file) as fin:
+                fin.readline()
+                for line in fin:
+                    idx, ae = line.split(',', 1)
+                    imgidx2ae[int(idx)] = np.fromstring(ae[1:-1], sep=',')
 
         # Add pairwise cosine distance based on autoencoder embeddings
         print("Adding ae distance")
@@ -56,22 +68,12 @@ class OfflineFeaturizer(Featurizer):
                         (',') if img != '-1' and type(img) == str]
                     img_ae_1 = []
                     for img_idx in img_idx_arr_1:
-                        img_dir_idx = int(str(img_idx)[-2])
-                        with open(ae_dir[img_dir_idx-1], 'r') as fin:
-                            fin.readline()
-                            for line in fin:
-                                if int(line.split(',')[0]) == img_idx:
-                                    img_ae_1.append(np.fromstring(line.split(',',1)[1][1:-1], sep=','))
+                        if img_idx in imgidx2ae:
+                            img_ae_1.append(imgidx2ae[img_idx])
                     img_ae_2 = []
                     for img_idx in img_idx_arr_2:
-                        img_dir_idx = int(str(img_idx)[-2])
-                        with open(ae_dir[img_dir_idx-1], 'r') as fin:
-                            fin.readline()
-                            for line in fin:
-                                if int(line.split(',')[0]) == img_idx:
-                                    img_ae_2.append(np.fromstring(line.split(',',1)[1][1:-1], sep=','))
-                    img_ae_1 = np.asarray(img_ae_1)
-                    img_ae_2 = np.asarray(img_ae_2)
+                        if img_idx in imgidx2ae:
+                            img_ae_2.append(imgidx2ae[img_idx])
 
                     if len(img_ae_1) > 0 and len(img_ae_2) > 0:
                         ae_dist  = pairwise_distances(img_ae_1, img_ae_2, metric=cosine_similarity)
@@ -229,7 +231,9 @@ def load_data(train_egs=None, test_egs=None):
     iteminfo_test.fillna(-1, inplace=True)
 
     # Merge iteminfo onto itempairs
-    itempairs_train, itempairs_test = featurizer._merge_itempairs(
+    #itempairs_train, itempairs_test = featurizer._merge_itempairs(
+    #    iteminfo_train, iteminfo_test, train_egs, test_egs)
+    itempairs_train, _ = featurizer._merge_itempairs(
         iteminfo_train, iteminfo_test, train_egs, test_egs)
 
     # Feature engineering on ItemPairs, i.e. pair of items
@@ -237,9 +241,9 @@ def load_data(train_egs=None, test_egs=None):
     itempairs_train = featurizer._add_ae_distance(
        itempairs_train,
        'itempairs_train_ae_distances.csv')
-    itempairs_test = featurizer._add_ae_distance(
-       itempairs_test,
-       'itempairs_test_ae_distances.csv')
+    #itempairs_test = featurizer._add_ae_distance(
+    #   itempairs_test,
+    #   'itempairs_test_ae_distances.csv')
     # itempairs_train = featurizer._add_phash_distance(
     #    itempairs_train,
     #    'itempairs_train_phash_distances.csv')

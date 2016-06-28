@@ -25,6 +25,10 @@ class Featurizer():
             lambda x: len([
                 idx for idx in str(x).split(',') if idx != '-1']))
 
+        # Add product of lon/lat
+        print("Adding lon x lat")
+        items['lonxlat'] = items['lon']*items['lat']
+
         items.drop(['images_array'], axis=1, inplace=True)
         return items
 
@@ -69,6 +73,10 @@ class Featurizer():
             pairs['lon_1'],
             pairs['lon_2']).astype(
             np.int32)
+        pairs['lonxlat_same'] = np.equal(
+            pairs['lonxlat_1'],
+            pairs['lonxlat_2']).astype(
+            np.int32)
 
         # Add l2 distance of lon/lat
         print("Adding l2 distances")
@@ -89,6 +97,15 @@ class Featurizer():
         try:
             phash = pd.read_csv('itempairs_%s_phash_distances.csv' % split)
             pairs = pd.merge(pairs, phash, how='left',
+                             on=['itemID_1', 'itemID_2'])
+        except:
+            raise Exception("Invalid split specified or file does not exist")
+
+        # Add precomputed autoencoder cosine distances
+        print("Adding precomputed autoencoder distances")
+        try:
+            ae = pd.read_csv('itempairs_%s_ae_distances.csv' % split)
+            pairs = pd.merge(pairs, ae, how='left',
                              on=['itemID_1', 'itemID_2'])
         except:
             raise Exception("Invalid split specified or file does not exist")
@@ -160,9 +177,9 @@ class Featurizer():
 
         # Randomly sample subset of ItemPairs
         if train_egs:
-            itempairs_train = itempairs_train.sample(n=train_egs)
+            itempairs_train = itempairs_train.sample(n=train_egs, random_state=69)
         if test_egs:
-            itempairs_test = itempairs_test.sample(n=test_egs)
+            itempairs_test = itempairs_test.sample(n=test_egs, random_state=69)
         return itempairs_train, itempairs_test
 
     def _get_features(self, train, test):
