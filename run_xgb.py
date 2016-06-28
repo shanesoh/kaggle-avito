@@ -23,7 +23,7 @@ def run_test():
         num_rounds = 100000,
         early_stopping_rounds = 20)
 
-    train, test, features = load_data(train_egs=1000, test_egs=100)
+    train, test, features = load_data(train_egs=100000, test_egs=10000)
     print('Length of train: ', len(train))
     print('Length of test: ', len(test))
     print('Features [{}]: {}'.format(len(features), sorted(features)))
