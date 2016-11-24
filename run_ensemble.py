@@ -44,7 +44,7 @@ def stack_nn(train, test, y, only_test=False):
         decay=None,
         rho=0.9,
         epsilon=1e-08,
-        patience=8)
+        patience=4)
 
     clf2 = NNClassifier(
         batch_norm=True,
@@ -61,7 +61,7 @@ def stack_nn(train, test, y, only_test=False):
         decay=None,
         rho=0.9,
         epsilon=1e-08,
-        patience=8)
+        patience=4)
 
     clfs = [clf1, clf2]
 
@@ -91,7 +91,16 @@ def stack_trees(train, test, y, only_test=False):
         num_rounds=5000,
         early_stopping_rounds=20)
 
-    clfs = [clf1, clf2]
+    clf3 = XGBClassifier(
+        eta=.1,
+        max_depth=6,
+        subsample=.8,
+        colsample_bytree=.8,
+        min_child_weight=1,
+        num_rounds=5000,
+        early_stopping_rounds=20)
+
+    clfs = [clf1, clf2, clf3]
 
     train_probs, test_probs = stack_models(
         train, test, y, clfs, n_folds=3, scaler=True, eval_fit=True,
@@ -153,24 +162,24 @@ def run_test(train_egs, test_egs, load_features):
     # Stack first level models and get meta features
     if not load_features:
         first_level_dir = 'saved_models/first_level/'
-        print('Stacking train knn')
-        meta_knn_train, meta_knn_test = stack_knn(
-            X_train_pca,
-            X_test_pca,
-            y_train)
-        pickle.dump(meta_knn_train, open(
-            first_level_dir + 'meta_knn_train.output', 'w'))
-        pickle.dump(meta_knn_test, open(
-            first_level_dir + 'meta_knn_test.output', 'w'))
-        print('Stacking train nn')
-        meta_nn_train, meta_nn_test = stack_nn(
-            X_train,
-            X_test,
-            y_train)
-        pickle.dump(meta_nn_train, open(
-            first_level_dir + 'meta_nn_train.output', 'w'))
-        pickle.dump(meta_nn_test, open(
-            first_level_dir + 'meta_nn_test.output', 'w'))
+        #print('Stacking train knn')
+        #meta_knn_train, meta_knn_test = stack_knn(
+        #    X_train_pca,
+        #    X_test_pca,
+        #    y_train)
+        #pickle.dump(meta_knn_train, open(
+        #    first_level_dir + 'meta_knn_train.output', 'w'))
+        #pickle.dump(meta_knn_test, open(
+        #    first_level_dir + 'meta_knn_test.output', 'w'))
+        #print('Stacking train nn')
+        #meta_nn_train, meta_nn_test = stack_nn(
+        #    X_train,
+        #    X_test,
+        #    y_train)
+        #pickle.dump(meta_nn_train, open(
+        #    first_level_dir + 'meta_nn_train.output', 'w'))
+        #pickle.dump(meta_nn_test, open(
+        #    first_level_dir + 'meta_nn_test.output', 'w'))
         print('Stacking train trees')
         meta_trees_train, meta_trees_test = stack_trees(
             X_train,
@@ -227,26 +236,29 @@ def run_test(train_egs, test_egs, load_features):
     # Create second level features from predictions and input features
     print('Creating second level features')
     dist_trees_train = get_distances(X_train, meta_trees_train)
-    dist_nn_train = get_distances(X_train, meta_nn_train)
-    dist_knn_train = get_distances(X_train, meta_knn_train)
+    #dist_nn_train = get_distances(X_train, meta_nn_train)
+    #dist_knn_train = get_distances(X_train, meta_knn_train)
 
     dist_trees_test = get_distances(X_test, meta_trees_test)
-    dist_nn_test = get_distances(X_test, meta_nn_test)
-    dist_knn_test = get_distances(X_test, meta_knn_test)
+    #dist_nn_test = get_distances(X_test, meta_nn_test)
+    #dist_knn_test = get_distances(X_test, meta_knn_test)
 
     dist_trees_valid = get_distances(X_valid, meta_trees_valid)
-    dist_nn_valid = get_distances(X_valid, meta_nn_valid)
-    dist_knn_valid = get_distances(X_valid, meta_knn_valid)
+    #dist_nn_valid = get_distances(X_valid, meta_nn_valid)
+    #dist_knn_valid = get_distances(X_valid, meta_knn_valid)
 
     train_nn2 = np.hstack(
         [meta_nn_train, meta_trees_train, meta_knn_train,
-         dist_nn_train, dist_trees_train, dist_knn_train])
+         #dist_nn_train, dist_trees_train, dist_knn_train])
+         dist_trees_train])
     test_nn2 = np.hstack(
         [meta_nn_test, meta_trees_test, meta_knn_test,
-         dist_nn_test, dist_trees_test, dist_knn_test])
+         #dist_nn_test, dist_trees_test, dist_knn_test])
+         dist_trees_test])
     valid_nn2 = np.hstack(
         [meta_nn_valid, meta_trees_valid, meta_knn_valid,
-         dist_nn_valid, dist_trees_valid, dist_knn_valid])
+         #dist_nn_valid, dist_trees_valid, dist_knn_valid])
+         dist_trees_valid])
 
     # Train second level models
     print('Training second level models')
@@ -258,11 +270,11 @@ def run_test(train_egs, test_egs, load_features):
     clf_nn2 = NNClassifier(
         batch_norm=True,
         hidden_units=1024,
-        hidden_layers=5,
+        hidden_layers=10,
         dropout=0.5,
         prelu=True,
         hidden_activation='relu',
-        batch_size=1024,
+        batch_size=8000,
         nb_epoch=1000,
         optimizer='adam',
         learning_rate=0.001,
