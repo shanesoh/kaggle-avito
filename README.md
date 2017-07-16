@@ -1,5 +1,1 @@
-# furry-funicular
-DA takes on the Kaggle Avito challenge :D
-
-Package dependencies:
-python-Levenshtein
+# Kaggle Avito Duplicate Ads Detection
