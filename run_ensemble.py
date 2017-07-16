@@ -162,24 +162,24 @@ def run_test(train_egs, test_egs, load_features):
     # Stack first level models and get meta features
     if not load_features:
         first_level_dir = 'saved_models/first_level/'
-        #print('Stacking train knn')
-        #meta_knn_train, meta_knn_test = stack_knn(
-        #    X_train_pca,
-        #    X_test_pca,
-        #    y_train)
-        #pickle.dump(meta_knn_train, open(
-        #    first_level_dir + 'meta_knn_train.output', 'w'))
-        #pickle.dump(meta_knn_test, open(
-        #    first_level_dir + 'meta_knn_test.output', 'w'))
-        #print('Stacking train nn')
-        #meta_nn_train, meta_nn_test = stack_nn(
-        #    X_train,
-        #    X_test,
-        #    y_train)
-        #pickle.dump(meta_nn_train, open(
-        #    first_level_dir + 'meta_nn_train.output', 'w'))
-        #pickle.dump(meta_nn_test, open(
-        #    first_level_dir + 'meta_nn_test.output', 'w'))
+        print('Stacking train knn')
+        meta_knn_train, meta_knn_test = stack_knn(
+            X_train_pca,
+            X_test_pca,
+            y_train)
+        pickle.dump(meta_knn_train, open(
+            first_level_dir + 'meta_knn_train.output', 'w'))
+        pickle.dump(meta_knn_test, open(
+            first_level_dir + 'meta_knn_test.output', 'w'))
+        print('Stacking train nn')
+        meta_nn_train, meta_nn_test = stack_nn(
+            X_train,
+            X_test,
+            y_train)
+        pickle.dump(meta_nn_train, open(
+            first_level_dir + 'meta_nn_train.output', 'w'))
+        pickle.dump(meta_nn_test, open(
+            first_level_dir + 'meta_nn_test.output', 'w'))
         print('Stacking train trees')
         meta_trees_train, meta_trees_test = stack_trees(
             X_train,
@@ -236,28 +236,28 @@ def run_test(train_egs, test_egs, load_features):
     # Create second level features from predictions and input features
     print('Creating second level features')
     dist_trees_train = get_distances(X_train, meta_trees_train)
-    #dist_nn_train = get_distances(X_train, meta_nn_train)
-    #dist_knn_train = get_distances(X_train, meta_knn_train)
+    dist_nn_train = get_distances(X_train, meta_nn_train)
+    dist_knn_train = get_distances(X_train, meta_knn_train)
 
     dist_trees_test = get_distances(X_test, meta_trees_test)
-    #dist_nn_test = get_distances(X_test, meta_nn_test)
-    #dist_knn_test = get_distances(X_test, meta_knn_test)
+    dist_nn_test = get_distances(X_test, meta_nn_test)
+    dist_knn_test = get_distances(X_test, meta_knn_test)
 
     dist_trees_valid = get_distances(X_valid, meta_trees_valid)
-    #dist_nn_valid = get_distances(X_valid, meta_nn_valid)
-    #dist_knn_valid = get_distances(X_valid, meta_knn_valid)
+    dist_nn_valid = get_distances(X_valid, meta_nn_valid)
+    dist_knn_valid = get_distances(X_valid, meta_knn_valid)
 
     train_nn2 = np.hstack(
         [meta_nn_train, meta_trees_train, meta_knn_train,
-         #dist_nn_train, dist_trees_train, dist_knn_train])
+         dist_nn_train, dist_trees_train, dist_knn_train,
          dist_trees_train])
     test_nn2 = np.hstack(
         [meta_nn_test, meta_trees_test, meta_knn_test,
-         #dist_nn_test, dist_trees_test, dist_knn_test])
+         dist_nn_test, dist_trees_test, dist_knn_test,
          dist_trees_test])
     valid_nn2 = np.hstack(
         [meta_nn_valid, meta_trees_valid, meta_knn_valid,
-         #dist_nn_valid, dist_trees_valid, dist_knn_valid])
+         dist_nn_valid, dist_trees_valid, dist_knn_valid,
          dist_trees_valid])
 
     # Train second level models

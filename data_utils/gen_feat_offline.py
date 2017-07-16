@@ -231,8 +231,8 @@ def load_data(train_egs=None, test_egs=None):
     iteminfo_test.fillna(-1, inplace=True)
 
     # Merge iteminfo onto itempairs
-    #itempairs_train, itempairs_test = featurizer._merge_itempairs(
-    #    iteminfo_train, iteminfo_test, train_egs, test_egs)
+    itempairs_train, itempairs_test = featurizer._merge_itempairs(
+        iteminfo_train, iteminfo_test, train_egs, test_egs)
     itempairs_train, _ = featurizer._merge_itempairs(
         iteminfo_train, iteminfo_test, train_egs, test_egs)
 
@@ -241,21 +241,21 @@ def load_data(train_egs=None, test_egs=None):
     itempairs_train = featurizer._add_ae_distance(
        itempairs_train,
        'itempairs_train_ae_distances.csv')
-    #itempairs_test = featurizer._add_ae_distance(
-    #   itempairs_test,
-    #   'itempairs_test_ae_distances.csv')
-    # itempairs_train = featurizer._add_phash_distance(
-    #    itempairs_train,
-    #    'itempairs_train_phash_distances.csv')
-    # itempairs_test = featurizer._add_phash_distance(
-    #    itempairs_test,
-    #    'itempairs_test_phash_distances.csv')
-    # itempairs_train = featurizer._add_edit_distance(
-    #    itempairs_train,
-    #    'itempairs_train_edit_distances.csv')
-    # itempairs_test = featurizer._add_edit_distance(
-    #    itempairs_test,
-    #    'itempairs_test_edit_distances.csv')
+    itempairs_test = featurizer._add_ae_distance(
+       itempairs_test,
+       'itempairs_test_ae_distances.csv')
+     itempairs_train = featurizer._add_phash_distance(
+        itempairs_train,
+        'itempairs_train_phash_distances.csv')
+     itempairs_test = featurizer._add_phash_distance(
+        itempairs_test,
+        'itempairs_test_phash_distances.csv')
+     itempairs_train = featurizer._add_edit_distance(
+        itempairs_train,
+        'itempairs_train_edit_distances.csv')
+     itempairs_test = featurizer._add_edit_distance(
+        itempairs_test,
+        'itempairs_test_edit_distances.csv')
     print(
         'Feature eng ItemPairs time: {} minutes'.format(
             round(

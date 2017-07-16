@@ -21,15 +21,15 @@ def image_gen(img_array, size, batch_size):
     return X_train
 
 image_dirs = ['./data/images/Images_1']
-#image_dirs = ['./data/images/Images_1',
-#              './data/images/Images_2',
-#              './data/images/Images_3',
-#              './data/images/Images_4',
-#              './data/images/Images_5',
-#              './data/images/Images_6',
-#              './data/images/Images_7',
-#              './data/images/Images_8',
-#              './data/images/Images_9']
+image_dirs = ['./data/images/Images_1',
+              './data/images/Images_2',
+              './data/images/Images_3',
+              './data/images/Images_4',
+              './data/images/Images_5',
+              './data/images/Images_6',
+              './data/images/Images_7',
+              './data/images/Images_8',
+              './data/images/Images_9']
 all_images = []
 for image_dir in image_dirs:
     for fd in os.listdir(image_dir):
@@ -59,15 +59,15 @@ decoded = Convolution2D(3, 3, 3, activation='sigmoid', border_mode='same', dim_o
 autoencoder = Model(input_img, decoded)
 autoencoder.compile(optimizer='adadelta', loss='binary_crossentropy')
 
-#print("Training...")
-#for n in range(nb_epoch):
-#    train = image_gen(all_images, input_shape, batch_size)
-#    loss = autoencoder.train_on_batch(train, train)
-#    print("Epoch  %s: %s" % (n, loss))
-#
-#print("Saving model...")
-#now = datetime.datetime.now()
-#autoencoder.save_weights("autoencoder_%s.model" % now.strftime("%Y-%m-%d-%H-%M"))
+print("Training...")
+for n in range(nb_epoch):
+    train = image_gen(all_images, input_shape, batch_size)
+    loss = autoencoder.train_on_batch(train, train)
+    print("Epoch  %s: %s" % (n, loss))
+
+print("Saving model...")
+now = datetime.datetime.now()
+autoencoder.save_weights("autoencoder_%s.model" % now.strftime("%Y-%m-%d-%H-%M"))
 
 def chunker(seq, size):
     return (seq[pos:pos + size] for pos in xrange(0, len(seq), size))
